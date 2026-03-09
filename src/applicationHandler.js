@@ -1,18 +1,31 @@
 // =============================================
-// FOCUS RP - Søknadshåndtering
-// Styrer DM-flyten og søknadstilstand
+// FOCUS RP - Søknadshåndtering v2
+// DM-flyt, branching, deny med grunn, spør om mer
 // =============================================
 
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle
+} = require('discord.js');
 const QUESTIONS = require('./questions');
 
-// In-memory state for aktive søknader
-// Map<userId, { step, branch, answers, startedAt }>
+// In-memory state
+// Map<userId, { step, branch, answers, startedAt, dmChannelId }>
 const activeApplications = new Map();
+
+// Map<staffMessageId, userId> — for å koble staff-handling til søker
+const staffMessageMap = new Map();
+
+// Map<userId, dmChannelId> — for "spør om mer"-flow
+const dmChannelCache = new Map();
 
 const TIMEOUT_MS = (parseInt(process.env.APPLICATION_TIMEOUT_MINUTES) || 30) * 60 * 1000;
 
-// Rydder opp søknader som har timet ut
 setInterval(() => {
   const now = Date.now();
   for (const [userId, app] of activeApplications.entries()) {
@@ -21,13 +34,20 @@ setInterval(() => {
       console.log(`[Timeout] Søknad fra ${userId} slettet pga inaktivitet.`);
     }
   }
-}, 5 * 60 * 1000); // Sjekk hvert 5. minutt
+}, 5 * 60 * 1000);
 
 
-// --- START SØKNAD ---
+// ─── START SØKNAD ───────────────────────────────────────────────────────────
+
 async function startApplication(user) {
   if (activeApplications.has(user.id)) {
-    await user.send(`⚠️ Du har allerede en aktiv søknad i gang. Svar på forrige spørsmål, eller vent til søknaden utløper etter ${process.env.APPLICATION_TIMEOUT_MINUTES || 30} minutter.`);
+    await user.send({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xE8B84B)
+          .setDescription(`⚠️ Du har allerede en aktiv søknad. Svar på spørsmålet i DM-en, eller vent til søknaden utløper etter ${process.env.APPLICATION_TIMEOUT_MINUTES || 30} minutter.`)
+      ]
+    }).catch(() => {});
     return;
   }
 
@@ -38,23 +58,31 @@ async function startApplication(user) {
     startedAt: Date.now()
   });
 
+  // Cache DM-channel for later (spør om mer)
+  const dmChannel = await user.createDM().catch(() => null);
+  if (dmChannel) dmChannelCache.set(user.id, dmChannel.id);
+
   try {
     await user.send({
       embeds: [
         new EmbedBuilder()
-          .setColor(0x2B2D31)
-          .setTitle('🎮 Velkommen til FOCUS RP Whitelist-søknad')
+          .setColor(0x1A1A2E)
+          .setAuthor({ name: 'FOCUS RP — Whitelist', iconURL: 'https://focusrp.no/favicon.ico' })
+          .setTitle('Velkommen til FOCUS RP')
           .setDescription(
-            `Hei **${user.username}**! Du har startet søknadsprosessen for FOCUS RP.\n\n` +
+            `**Rollespill på ordentlig.**\n\n` +
+            `Du har startet søknadsprosessen for FOCUS RP.\n\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
             `**Slik fungerer det:**\n` +
-            `→ Du vil få **8 spørsmål** totalt\n` +
+            `→ **9 spørsmål** totalt\n` +
             `→ Svar direkte i denne DM-chatten\n` +
-            `→ Du har **${process.env.APPLICATION_TIMEOUT_MINUTES || 30} minutter** per spørsmål\n` +
-            `→ Noen svar filtreres automatisk – vær ærlig\n\n` +
-            `Søknaden din vil bli gjennomgått av staff så fort som mulig.\n\n` +
-            `*Trykk på knappen under for å starte.*`
+            `→ Du har **${process.env.APPLICATION_TIMEOUT_MINUTES || 30} min** per spørsmål\n` +
+            `→ Søknaden behandles av staff innen 24 timer\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+            `Trykk på knappen under for å starte.`
           )
-          .setFooter({ text: 'FOCUS RP | focusrp.no' })
+          .setFooter({ text: 'focusrp.no  ·  Rollespill på ordentlig' })
+          .setTimestamp()
       ],
       components: [
         new ActionRowBuilder().addComponents(
@@ -68,12 +96,12 @@ async function startApplication(user) {
     });
   } catch (err) {
     console.error(`[Error] Kunne ikke sende DM til ${user.tag}:`, err.message);
-    // DMs er kanskje lukket
   }
 }
 
 
-// --- SEND NESTE SPØRSMÅL ---
+// ─── SEND NESTE SPØRSMÅL ────────────────────────────────────────────────────
+
 async function sendNextQuestion(user) {
   const app = activeApplications.get(user.id);
   if (!app) return;
@@ -81,43 +109,39 @@ async function sendNextQuestion(user) {
   const generalQuestions = QUESTIONS.general;
   const totalGeneralSteps = generalQuestions.length;
 
-  // Er vi i general-fasen?
   if (app.step < totalGeneralSteps) {
     const q = generalQuestions[app.step];
-    await user.send(q.question);
+    const text = Array.isArray(q.question) ? q.question.join('\n') : q.question;
+    await user.send(text);
     return;
   }
 
-  // Er vi i branch-fasen?
   if (app.branch) {
     const branchQuestions = QUESTIONS[app.branch];
     const branchStep = app.step - totalGeneralSteps;
-
     if (branchStep < branchQuestions.length) {
       const q = branchQuestions[branchStep];
-      await user.send(q.question);
+      const text = Array.isArray(q.question) ? q.question.join('\n') : q.question;
+      await user.send(text);
       return;
     }
-
-    // Alle spørsmål besvart
     await finishApplication(user);
     return;
   }
 }
 
 
-// --- BEHANDLE SVAR ---
+// ─── BEHANDLE SVAR ──────────────────────────────────────────────────────────
+
 async function handleAnswer(message) {
   const user = message.author;
   const app = activeApplications.get(user.id);
-
-  if (!app) return false; // Ingen aktiv søknad
+  if (!app) return false;
 
   const generalQuestions = QUESTIONS.general;
   const totalGeneralSteps = generalQuestions.length;
   let currentQuestion;
 
-  // Hent riktig spørsmål
   if (app.step < totalGeneralSteps) {
     currentQuestion = generalQuestions[app.step];
   } else if (app.branch) {
@@ -128,90 +152,81 @@ async function handleAnswer(message) {
 
   if (!currentQuestion) return false;
 
-  // Valider svaret
-  const validation = currentQuestion.validate ? currentQuestion.validate(message.content) : { pass: true };
+  const validation = currentQuestion.validate
+    ? currentQuestion.validate(message.content)
+    : { pass: true };
 
   if (!validation.pass) {
-    // Auto-avslag (f.eks. for ung, ikke lest regler)
     if (validation.autoReject) {
       await message.reply({
         embeds: [
           new EmbedBuilder()
-            .setColor(0xFF4444)
+            .setColor(0xE05252)
             .setTitle('❌ Søknad avslått')
             .setDescription(validation.reason)
-            .setFooter({ text: 'FOCUS RP | focusrp.no' })
+            .setFooter({ text: 'FOCUS RP  ·  focusrp.no' })
         ]
       });
       activeApplications.delete(user.id);
       console.log(`[AutoReject] ${user.tag} ble automatisk avslått.`);
       return true;
     }
-
-    // Valideringsfeil – be om nytt svar
-    await message.reply(`⚠️ ${validation.reason}\n\nProv igjen:`);
+    await message.reply(`⚠️ ${validation.reason}\n\nPrøv igjen:`);
     return true;
   }
 
-  // Lagre svaret
   app.answers[currentQuestion.id] = message.content;
-
-  // Sett branch hvis karakter-type ble valgt
-  if (validation.branch) {
-    app.branch = validation.branch;
-  }
-
-  // Gå til neste steg
+  if (validation.branch) app.branch = validation.branch;
   app.step++;
   activeApplications.set(user.id, app);
 
-  // Bekreft og send neste spørsmål
   await message.react('✅');
   await sendNextQuestion(user);
   return true;
 }
 
 
-// --- FULLFØR SØKNAD ---
+// ─── FULLFØR SØKNAD ─────────────────────────────────────────────────────────
+
 async function finishApplication(user) {
   const app = activeApplications.get(user.id);
   if (!app) return;
-
   activeApplications.delete(user.id);
 
-  // Bekreft til søker
   await user.send({
     embeds: [
       new EmbedBuilder()
-        .setColor(0xFFAA00)
-        .setTitle('📨 Søknad mottatt!')
+        .setColor(0xE8B84B)
+        .setAuthor({ name: 'FOCUS RP — Whitelist', iconURL: 'https://focusrp.no/favicon.ico' })
+        .setTitle('📨 Søknad mottatt')
         .setDescription(
-          `Takk for at du søkte på FOCUS RP, **${user.username}**!\n\n` +
-          `Søknaden din er nå sendt til staff og vil bli behandlet så snart som mulig.\n\n` +
-          `Du vil motta en melding her i DM når søknaden er behandlet.\n\n` +
-          `*Gjennomsnittlig behandlingstid: 24 timer*`
+          `Takk for at du søkte på **FOCUS RP**, ${user.username}!\n\n` +
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+          `Søknaden din er sendt til staff og vil bli behandlet\n` +
+          `så snart som mulig — vanligvis innen **24 timer**.\n\n` +
+          `Du vil motta en DM her når søknaden er behandlet.\n` +
+          `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`
         )
-        .setFooter({ text: 'FOCUS RP | focusrp.no' })
+        .setFooter({ text: 'focusrp.no  ·  Rollespill på ordentlig' })
+        .setTimestamp()
     ]
   });
 
-  // Post til staff-kanal
   await postToStaffChannel(user, app);
 }
 
 
-// --- POST TIL STAFF-KANAL ---
-async function postToStaffChannel(user, app, client) {
-  // client injiseres via module.exports
+// ─── POST TIL STAFF-KANAL ───────────────────────────────────────────────────
+
+async function postToStaffChannel(user, app) {
   const staffChannelId = process.env.STAFF_CHANNEL_ID;
   const staffChannel = global.botClient?.channels.cache.get(staffChannelId);
 
   if (!staffChannel) {
-    console.error('[Error] Staff-kanalen ble ikke funnet! Sjekk STAFF_CHANNEL_ID i .env');
+    console.error('[Error] Staff-kanalen ikke funnet! Sjekk STAFF_CHANNEL_ID i .env');
     return;
   }
 
-  // Bygg svar-fields
   const allQuestions = [
     ...QUESTIONS.general,
     ...(QUESTIONS[app.branch] || [])
@@ -220,49 +235,46 @@ async function postToStaffChannel(user, app, client) {
   const fields = allQuestions
     .filter(q => app.answers[q.id])
     .map(q => {
-      // Hent spørsmålsteksten (fjern discord markdown formatering)
-      const cleanQuestion = q.question
-        .replace(/\*\*/g, '')
-        .split('\n')[0]
-        .replace(/^[^\—]+— /, '');
+      const rawQuestion = Array.isArray(q.question) ? q.question.join('\n') : q.question;
+      // Hent første linje med emojier som field-navn
+      const titleLine = rawQuestion
+        .split('\n')
+        .find(l => l.trim().length > 0 && !l.includes('╔') && !l.includes('║') && !l.includes('╚') && !l.includes('FOCUS') && !l.includes('Spørsmål'))
+        || q.id;
 
       return {
-        name: cleanQuestion.substring(0, 100),
-        value: app.answers[q.id].substring(0, 1024) || '*Ikke besvart*',
+        name: titleLine.replace(/\*\*/g, '').trim().substring(0, 100),
+        value: app.answers[q.id].substring(0, 1024),
         inline: false
       };
     });
 
-  // Branch-farge
-  const branchColors = {
-    lovlydig: 0x4488FF,
-    kriminell: 0xFF4444,
-    nøytral: 0xAAAAAA
+  const branchConfig = {
+    lovlydig:  { color: 0x4A90D9, label: '🔵 Lovlydig',  emoji: '🔵' },
+    kriminell: { color: 0xE05252, label: '🔴 Kriminell', emoji: '🔴' },
+    'nøytral': { color: 0x9B9B9B, label: '⚪ Nøytral',   emoji: '⚪' }
   };
-
-  const branchEmojis = {
-    lovlydig: '🔵 Lovlydig',
-    kriminell: '🔴 Kriminell',
-    nøytral: '⚪ Nøytral'
-  };
+  const bc = branchConfig[app.branch] || { color: 0x1A1A2E, label: 'Ukjent', emoji: '❓' };
 
   const embed = new EmbedBuilder()
-    .setColor(branchColors[app.branch] || 0x2B2D31)
-    .setTitle(`📋 Ny søknad — ${user.tag}`)
-    .setThumbnail(user.displayAvatarURL())
+    .setColor(bc.color)
+    .setAuthor({ name: 'FOCUS RP — Ny søknad', iconURL: 'https://focusrp.no/favicon.ico' })
+    .setTitle(`${bc.emoji}  ${user.tag}`)
+    .setThumbnail(user.displayAvatarURL({ dynamic: true }))
     .addFields(
-      { name: '👤 Søker', value: `<@${user.id}> (${user.id})`, inline: true },
-      { name: '🎭 Karaktertype', value: branchEmojis[app.branch] || 'Ukjent', inline: true },
-      { name: '📅 Sendt', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true },
-      { name: '\u200B', value: '\u200B', inline: false },
+      { name: '👤 Søker',        value: `<@${user.id}> \`(${user.id})\``, inline: true },
+      { name: '🎭 Karaktertype', value: bc.label,                          inline: true },
+      { name: '📅 Sendt',        value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true },
+      { name: '─────────────────────────────────', value: '_ _', inline: false },
       ...fields
     )
-    .setFooter({ text: 'FOCUS RP Whitelist System | focusrp.no' });
+    .setFooter({ text: 'FOCUS RP Whitelist System  ·  focusrp.no' })
+    .setTimestamp();
 
-  const actionRow = new ActionRowBuilder().addComponents(
+  const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`accept_${user.id}`)
-      .setLabel('Godkjenn')
+      .setLabel('Godkjenn → Intervju')
       .setStyle(ButtonStyle.Success)
       .setEmoji('✅'),
     new ButtonBuilder()
@@ -277,14 +289,19 @@ async function postToStaffChannel(user, app, client) {
       .setEmoji('💬')
   );
 
-  await staffChannel.send({ embeds: [embed], components: [actionRow] });
+  const staffMsg = await staffChannel.send({ embeds: [embed], components: [row] });
+  staffMessageMap.set(staffMsg.id, user.id);
   console.log(`[Application] Søknad fra ${user.tag} (${app.branch}) postet til staff.`);
 }
 
+
+// ─── EXPORTS ────────────────────────────────────────────────────────────────
 
 module.exports = {
   startApplication,
   sendNextQuestion,
   handleAnswer,
-  activeApplications
+  activeApplications,
+  staffMessageMap,
+  dmChannelCache
 };
