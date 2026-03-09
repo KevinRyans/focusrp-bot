@@ -100,6 +100,25 @@ async function startApplication(user) {
 }
 
 
+// ─── EMBED HELPER ───────────────────────────────────────────────────────────
+
+function buildQuestionEmbed(q, stepNumber, branch) {
+  const branchColors = {
+    lovlydig:  0x4A90D9,
+    kriminell: 0xE05252,
+    'nøytral': 0x9B9B9B
+  };
+  const color = branchColors[branch] || 0x1A1A2E;
+
+  return new EmbedBuilder()
+    .setColor(color)
+    .setAuthor({ name: `FOCUS RP — Søknad  ·  Spørsmål ${stepNumber}/9` })
+    .setTitle(q.title)
+    .setDescription(q.description)
+    .setFooter({ text: 'focusrp.no  ·  Rollespill på ordentlig' });
+}
+
+
 // ─── SEND NESTE SPØRSMÅL ────────────────────────────────────────────────────
 
 async function sendNextQuestion(user) {
@@ -111,8 +130,7 @@ async function sendNextQuestion(user) {
 
   if (app.step < totalGeneralSteps) {
     const q = generalQuestions[app.step];
-    const text = Array.isArray(q.question) ? q.question.join('\n') : q.question;
-    await user.send(text);
+    await user.send({ embeds: [buildQuestionEmbed(q, app.step + 1, null)] });
     return;
   }
 
@@ -121,8 +139,7 @@ async function sendNextQuestion(user) {
     const branchStep = app.step - totalGeneralSteps;
     if (branchStep < branchQuestions.length) {
       const q = branchQuestions[branchStep];
-      const text = Array.isArray(q.question) ? q.question.join('\n') : q.question;
-      await user.send(text);
+      await user.send({ embeds: [buildQuestionEmbed(q, app.step + 1, app.branch)] });
       return;
     }
     await finishApplication(user);
@@ -235,16 +252,12 @@ async function postToStaffChannel(user, app) {
   const fields = allQuestions
     .filter(q => app.answers[q.id])
     .map(q => {
-      const rawQuestion = Array.isArray(q.question) ? q.question.join('\n') : q.question;
-      // Hent første linje med emojier som field-navn
-      const titleLine = rawQuestion
-        .split('\n')
-        .find(l => l.trim().length > 0 && !l.includes('╔') && !l.includes('║') && !l.includes('╚') && !l.includes('FOCUS') && !l.includes('Spørsmål'))
-        || q.id;
-
+      const descTruncated = q.description.substring(0, 200);
+      const answer = app.answers[q.id];
+      const value = `**Spørsmål:** ${descTruncated}\n**Svar:** ${answer}`;
       return {
-        name: titleLine.replace(/\*\*/g, '').trim().substring(0, 100),
-        value: app.answers[q.id].substring(0, 1024),
+        name: q.title,
+        value: value.substring(0, 1024),
         inline: false
       };
     });
