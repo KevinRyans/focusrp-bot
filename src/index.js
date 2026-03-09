@@ -141,7 +141,7 @@ client.on('interactionCreate', async (interaction) => {
       const targetId = customId.replace('deny_', '');
 
       const modal = new ModalBuilder()
-        .setCustomId(`deny_modal_${targetId}`)
+        .setCustomId(`deny_modal_${targetId}_${interaction.message.id}`)
         .setTitle('Avslå søknad — skriv grunn');
 
       const reasonInput = new TextInputBuilder()
@@ -163,7 +163,7 @@ client.on('interactionCreate', async (interaction) => {
       const targetId = customId.replace('question_', '');
 
       const modal = new ModalBuilder()
-        .setCustomId(`question_modal_${targetId}`)
+        .setCustomId(`question_modal_${targetId}_${interaction.message.id}`)
         .setTitle('Spørsmål til søker');
 
       const questionInput = new TextInputBuilder()
@@ -187,17 +187,23 @@ client.on('interactionCreate', async (interaction) => {
 
     // Avslå med grunn
     if (customId.startsWith('deny_modal_')) {
-      const targetId = customId.replace('deny_modal_', '');
+      const rest = customId.slice('deny_modal_'.length);
+      const sep = rest.lastIndexOf('_');
+      const targetId = rest.slice(0, sep);
+      const staffMessageId = rest.slice(sep + 1);
       const reason = interaction.fields.getTextInputValue('deny_reason');
-      await handleDeny(interaction, targetId, reason);
+      await handleDeny(interaction, targetId, reason, staffMessageId);
       return;
     }
 
     // Spørsmål til søker
     if (customId.startsWith('question_modal_')) {
-      const targetId = customId.replace('question_modal_', '');
+      const rest = customId.slice('question_modal_'.length);
+      const sep = rest.lastIndexOf('_');
+      const targetId = rest.slice(0, sep);
+      const staffMessageId = rest.slice(sep + 1);
       const question = interaction.fields.getTextInputValue('staff_question');
-      await handleStaffQuestion(interaction, targetId, question);
+      await handleStaffQuestion(interaction, targetId, question, staffMessageId);
       return;
     }
   }
@@ -256,7 +262,7 @@ async function handleAccept(interaction, targetId, guild) {
 
 // ─── AVSLÅ MED GRUNN ────────────────────────────────────────────────────────
 
-async function handleDeny(interaction, targetId, reason) {
+async function handleDeny(interaction, targetId, reason, staffMessageId) {
   // DM søker med grunn
   try {
     const targetUser = await client.users.fetch(targetId);
@@ -283,19 +289,25 @@ async function handleDeny(interaction, targetId, reason) {
     console.error(`[Error] Kunne ikke DM-e ${targetId}:`, err.message);
   }
 
-  // Oppdater staff-embed
-  const originalEmbed = EmbedBuilder.from(interaction.message.embeds[0]);
-  originalEmbed.setColor(0xE05252);
-  originalEmbed.addFields({ name: '❌ Avslagsgrunn', value: reason });
-  originalEmbed.setFooter({ text: `❌ Avslått av ${interaction.user.tag}  ·  focusrp.no` });
+  // Oppdater staff-embed direkte (modal submit støtter ikke interaction.update)
+  try {
+    const staffMsg = await interaction.channel.messages.fetch(staffMessageId);
+    const originalEmbed = EmbedBuilder.from(staffMsg.embeds[0]);
+    originalEmbed.setColor(0xE05252);
+    originalEmbed.addFields({ name: '❌ Avslagsgrunn', value: reason });
+    originalEmbed.setFooter({ text: `❌ Avslått av ${interaction.user.tag}  ·  focusrp.no` });
+    await staffMsg.edit({ embeds: [originalEmbed], components: [] });
+  } catch (err) {
+    console.error(`[Error] Kunne ikke oppdatere staff-embed:`, err.message);
+  }
 
-  await interaction.update({ embeds: [originalEmbed], components: [] });
+  await interaction.reply({ content: `✅ Søknaden er avslått og søkeren er varslet.`, ephemeral: true });
   console.log(`[Deny] ${targetId} avslått av ${interaction.user.tag}. Grunn: ${reason}`);
 }
 
 // ─── SPØR OM MER ────────────────────────────────────────────────────────────
 
-async function handleStaffQuestion(interaction, targetId, question) {
+async function handleStaffQuestion(interaction, targetId, question, staffMessageId) {
   try {
     const targetUser = await client.users.fetch(targetId);
     await targetUser.send({
@@ -319,20 +331,20 @@ async function handleStaffQuestion(interaction, targetId, question) {
 
     // Registrer at vi venter på svar fra søkeren
     pendingStaffReplies.set(targetId, {
-      staffMessageId: interaction.message.id,
-      staffChannelId: interaction.message.channelId,
+      staffMessageId,
+      staffChannelId: interaction.channelId,
       askedBy: interaction.user.tag,
       question
     });
 
-    // Marker embed som "avventer svar"
-    const originalEmbed = EmbedBuilder.from(interaction.message.embeds[0]);
+    // Oppdater staff-embed direkte (modal submit støtter ikke interaction.update)
+    const staffMsg = await interaction.channel.messages.fetch(staffMessageId);
+    const originalEmbed = EmbedBuilder.from(staffMsg.embeds[0]);
     originalEmbed.setColor(0x4A90D9);
     originalEmbed.addFields({ name: '💬 Spørsmål sendt', value: `**${interaction.user.tag}** spurte: ${question}` });
+    await staffMsg.edit({ embeds: [originalEmbed] });
 
-    await interaction.update({ embeds: [originalEmbed] });
-    await interaction.followUp({ content: `✅ Spørsmålet er sendt til søkeren. De svarer i DM.`, ephemeral: true });
-
+    await interaction.reply({ content: `✅ Spørsmålet er sendt til søkeren. De svarer i DM.`, ephemeral: true });
     console.log(`[Question] ${interaction.user.tag} sendte spørsmål til ${targetId}`);
   } catch (err) {
     await interaction.reply({ content: `❌ Kunne ikke sende melding til søkeren. De har kanskje lukket DMs.`, ephemeral: true });
