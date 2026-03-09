@@ -1,6 +1,6 @@
 // =============================================
-// FOCUS RP - Spørsmålsbank v2
-// Fødselsdato-validering + dype karakterspørsmål
+// FOCUS RP - Spørsmålsbank v3
+// Scenario-basert, naturlig norsk, tester RP-forståelse
 // =============================================
 
 const QUESTIONS = {
@@ -71,14 +71,14 @@ const QUESTIONS = {
 
     {
       id: 'rp_experience',
-      title: '🎮 Roleplay-erfaring',
+      title: '🎮 RP-bakgrunn',
       description:
-        `Hva er din erfaring med RP fra før?\n\n` +
-        `*Vær ærlig — vi vurderer ikke etter erfaring, men etter ærlighet.*\n` +
+        `Hva har du spilt av RP fra før?\n\n` +
+        `Vær ærlig. Vi straffer ikke folk som er nye — vi merker bare raskt om noen overdriver.\n\n` +
         `*Minimum 40 tegn.*`,
       validate: (answer) => {
         if (answer.trim().length < 40) {
-          return { pass: false, reason: `Gi et litt mer utfyllende svar om bakgrunnen din. (Minimum 40 tegn)` };
+          return { pass: false, reason: `Gi et litt mer utfyllende svar. (Minimum 40 tegn)` };
         }
         return { pass: true };
       }
@@ -86,14 +86,15 @@ const QUESTIONS = {
 
     {
       id: 'rp_definition',
-      title: '🧠 RP-forståelse',
+      title: '🧠 Scenario — metagaming',
       description:
-        `Forklar med egne ord hva **MeRP** og **BreakRP** betyr,\n` +
-        `og gi et eksempel på hvert.\n\n` +
-        `*Dette tester grunnleggende RP-forståelse.*`,
+        `Du sitter i en RP-scene. En Discord-venn sender deg melding og forteller deg akkurat hva som venter rundt hjørnet — info karakteren din umulig kan vite.\n\n` +
+        `**To spørsmål:**\n` +
+        `→ Hva heter regelbruddet det ville vært å bruke denne infoen IC?\n` +
+        `→ Hva gjør du med meldingen?`,
       validate: (answer) => {
         if (answer.trim().length < 60) {
-          return { pass: false, reason: `Forklar begge begrepene og gi eksempler. (Minimum 60 tegn)` };
+          return { pass: false, reason: `Svar på begge spørsmålene. (Minimum 60 tegn)` };
         }
         return { pass: true };
       }
@@ -131,9 +132,9 @@ const QUESTIONS = {
       id: 'lv_karakter',
       title: '📝 Karakterbakgrunn',
       description:
-        `Hvem er karakteren din?\n` +
-        `Fortell om **navn, alder, yrke og bakgrunnshistorie**.\n\n` +
-        `*Hva har denne personen opplevd? Hva driver dem?*\n` +
+        `Hvem er karakteren din?\n\n` +
+        `Navn, alder, hva de gjør til daglig — og det viktigste: hva er historien bak dem? ` +
+        `Hva har skjedd i livet deres som gjør dem til den de er?\n\n` +
         `*Minimum 80 tegn.*`,
       validate: (a) => a.trim().length < 80
         ? { pass: false, reason: `Gi en mer detaljert karakterhistorie. (Minimum 80 tegn)` }
@@ -141,27 +142,25 @@ const QUESTIONS = {
     },
 
     {
-      id: 'lv_yrke_motivasjon',
-      title: '💼 Yrke & Motivasjon',
+      id: 'lv_fearrp',
+      title: '😰 Scenario — FearRP',
       description:
-        `Hvilket yrke ønsker karakteren å ha, og **hvorfor nettopp dette**?\n\n` +
-        `*Ikke bare yrkestittel — hva betyr det for karakteren?*\n` +
-        `*Hva ønsker de å oppnå gjennom det?*`,
-      validate: (a) => a.trim().length < 50
-        ? { pass: false, reason: `Utdyp motivasjonen bak yrkesvalget. (Minimum 50 tegn)` }
+        `Karakteren din er alene på en øde parkeringsplass sent på kvelden. To maskerte menn nærmer seg og sier: *«Gi oss bilen og lommeboka, nå.»*\n\n` +
+        `En del av deg tenker at det bare er et spill og vil bare kjøre vekk.\n\n` +
+        `**Hva gjør karakteren din, og hva heter prinsippet du bryter dersom du ignorerer trusselen?**`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Svar på begge deler. (Minimum 60 tegn)` }
         : { pass: true }
     },
 
     {
-      id: 'lv_grense_scenario',
-      title: '⚖️ Scenario — moralsk press',
+      id: 'lv_rdm',
+      title: '🚗 Scenario — RDM/VDM',
       description:
-        `En kollega ber karakteren din om å se en annen vei på noe ulovlig\n` +
-        `som gavner begge parter — og truer med å si opp dersom du ikke gjør det.\n\n` +
-        `**Hva gjør karakteren din, steg for steg?**\n\n` +
-        `*Vis beslutningsprosessen. Ikke hva "riktig svar" er — hva gjør DIN karakter?*`,
-      validate: (a) => a.trim().length < 80
-        ? { pass: false, reason: `Gi et mer gjennomtenkt svar på scenarioet. (Minimum 80 tegn)` }
+        `Du kjører rolig nedover gaten. En bil begynner å ramme deg gjentatte ganger, sjåføren hopper ut og skyter mot deg — uten ett ord RP-messig.\n\n` +
+        `**Hva heter dette regelrubruddet, og hva gjør du (IC og OOC)?**`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Svar på begge deler. (Minimum 60 tegn)` }
         : { pass: true }
     },
 
@@ -170,10 +169,9 @@ const QUESTIONS = {
       title: '🌆 Bidrag til serveren',
       description:
         `Hva ønsker du å bidra med til FOCUS RP som lovlydig karakter?\n\n` +
-        `*Tenk på andre spillere, historier, og miljøet på serveren.*\n` +
-        `*Hva skaper DU for andre?*`,
+        `Ikke "jeg vil ha det gøy" — tenk på de andre spillerne. Hva skaper du for dem?`,
       validate: (a) => a.trim().length < 50
-        ? { pass: false, reason: `Utdyp hvordan du ønsker å bidra. (Minimum 50 tegn)` }
+        ? { pass: false, reason: `Utdyp litt mer. (Minimum 50 tegn)` }
         : { pass: true }
     }
   ],
@@ -185,37 +183,35 @@ const QUESTIONS = {
       id: 'kr_karakter',
       title: '📝 Karakterbakgrunn',
       description:
-        `Hvem er karakteren din?\n` +
-        `Fortell om **navn, alder og historien bak den kriminelle livsstilen**.\n\n` +
-        `*Hva har ført dem hit? Hva er drivkraften? Minimum 80 tegn.*`,
+        `Hvem er karakteren din?\n\n` +
+        `Navn, alder, og det viktigste: hva er veien som førte dem til kriminalitet? ` +
+        `«Han er bare slik» holder ikke — gi oss noe å tro på.\n\n` +
+        `*Minimum 80 tegn.*`,
       validate: (a) => a.trim().length < 80
         ? { pass: false, reason: `Gi en mer detaljert karakterhistorie. (Minimum 80 tegn)` }
         : { pass: true }
     },
 
     {
-      id: 'kr_fearrp',
-      title: '😰 FearRP — Scenario',
+      id: 'kr_rdm',
+      title: '🔫 Scenario — RDM',
       description:
-        `Karakteren din er alene og blir omringet av fire maskerte og bevæpnede\n` +
-        `menn. De krever at du overlater bilen og alle verdisaker — nå.\n\n` +
-        `**Hva gjør karakteren din, og hva tenker de i øyeblikket?**\n\n` +
-        `*Vis din forståelse av FearRP og karakterens menneskelige reaksjoner.*`,
-      validate: (a) => a.trim().length < 80
-        ? { pass: false, reason: `Utdyp svaret ditt. Vi vil se tankeprosessen. (Minimum 80 tegn)` }
+        `En bekjent i miljøet ditt foreslår å kjøre forbi en tilfeldig gruppe folk og skyte mot dem — ingen RP-grunn, «bare for moro».\n\n` +
+        `**Hva heter dette regelrubruddet, og hva sier/gjør karakteren din?**`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Svar på begge deler. (Minimum 60 tegn)` }
         : { pass: true }
     },
 
     {
-      id: 'kr_grenser',
-      title: '🚫 Grenser for kriminell RP',
+      id: 'kr_fearrp',
+      title: '😰 Scenario — FearRP',
       description:
-        `Kriminell RP kan gå mange veier. Beskriv:\n\n` +
-        `→ Hva er du **komfortabel** med å RP-e?\n` +
-        `→ Hva er dine **absolutte grenser**?\n` +
-        `→ Hva er forskjellen på god kriminell RP og "griefer"-adferd?`,
-      validate: (a) => a.trim().length < 80
-        ? { pass: false, reason: `Vær mer konkret og utfyllende. (Minimum 80 tegn)` }
+        `Karakteren din er alene og blir omringet av fire bevæpnede menn. De krever bilen og alle verdisaker.\n\n` +
+        `Karakteren din er «tough» — du vil argumentere tilbake.\n\n` +
+        `**Hva gjør karakteren din, og hvorfor er det feil å ikke vise frykt her?**`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Utdyp svaret. (Minimum 60 tegn)` }
         : { pass: true }
     },
 
@@ -223,11 +219,10 @@ const QUESTIONS = {
       id: 'kr_rp_verdi',
       title: '🎭 RP-verdi for andre',
       description:
-        `Kriminell RP handler ikke bare om action for deg selv.\n\n` +
-        `**Gi et konkret eksempel på en RP-situasjon du ønsker å skape**\n` +
-        `som gir verdi for ANDRE spillere — lovlydig eller kriminell.`,
-      validate: (a) => a.trim().length < 80
-        ? { pass: false, reason: `Gi et mer konkret og gjennomtenkt eksempel. (Minimum 80 tegn)` }
+        `Kriminell RP er ikke bare action for deg selv.\n\n` +
+        `Gi oss et konkret eksempel på en situasjon du vil skape på serveren — en scene som gir noe til ANDRE spillere, enten de er kriminelle eller ikke.`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Gi et mer konkret eksempel. (Minimum 60 tegn)` }
         : { pass: true }
     }
   ],
@@ -239,36 +234,34 @@ const QUESTIONS = {
       id: 'nu_karakter',
       title: '📝 Karakterkonsept',
       description:
-        `Hvem er karakteren din?\n` +
-        `Fortell om **navn, alder, bakgrunn og personlighet**.\n\n` +
-        `*Hva gjør denne personen interessant? Minimum 80 tegn.*`,
+        `Hvem er karakteren din?\n\n` +
+        `Navn, alder, bakgrunn. En nøytral karakter kan fort bli uklar — ` +
+        `overbevis oss om at denne personen har en tydelig identitet.\n\n` +
+        `*Minimum 80 tegn.*`,
       validate: (a) => a.trim().length < 80
         ? { pass: false, reason: `Gi en mer detaljert karakterbeskrivelse. (Minimum 80 tegn)` }
         : { pass: true }
     },
 
     {
-      id: 'nu_motivasjon',
-      title: '🌆 Motivasjon',
+      id: 'nu_metagaming',
+      title: '🧠 Scenario — metagaming',
       description:
-        `Hva bringer karakteren til Oslo, og hva holder dem der?\n\n` +
-        `*Hva søker karakteren — trygghet, penger, tilhørighet, hevn?*\n` +
-        `*Vær spesifikk.*`,
-      validate: (a) => a.trim().length < 50
-        ? { pass: false, reason: `Gi et mer utfyllende svar. (Minimum 50 tegn)` }
+        `Du handler med noen du aldri har møtt IC. OOC kjenner du dem fra Discord — du vet at de egentlig jobber undercover for politiet.\n\n` +
+        `**Hva heter det dersom du bruker denne infoen IC, og hva gjør du?**`,
+      validate: (a) => a.trim().length < 60
+        ? { pass: false, reason: `Svar på begge deler. (Minimum 60 tegn)` }
         : { pass: true }
     },
 
     {
-      id: 'nu_moralsk_valg',
-      title: '⚖️ Moralsk valg',
+      id: 'nu_failrp',
+      title: '🚨 Scenario — FailRP',
       description:
-        `Karakteren din ser en nær venn stjele fra en fattig familiebedrift.\n` +
-        `Vennen hevder de ikke hadde noe annet valg.\n\n` +
-        `**Hva gjør karakteren din — og hva sier det om hvem de er?**\n\n` +
-        `*Ingen fasit. Vi vil se karakterens indre logikk.*`,
-      validate: (a) => a.trim().length < 60
-        ? { pass: false, reason: `Utdyp svaret og karakterens tankeprosess. (Minimum 60 tegn)` }
+        `Karakteren din er involvert i en bilulykke. Bilen er vraket og du er skadet RP-messig. En annen spiller stopper og tilbyr hjelp — men du hopper bare inn i en ny bil og kjører avgårde som om ingenting har skjedd.\n\n` +
+        `**Hva er galt med dette, og hva heter regelrubruddet?**`,
+      validate: (a) => a.trim().length < 50
+        ? { pass: false, reason: `Forklar hva som er galt. (Minimum 50 tegn)` }
         : { pass: true }
     },
 
@@ -277,8 +270,9 @@ const QUESTIONS = {
       title: '🎭 Drømmescenario',
       description:
         `Beskriv en konkret RP-situasjon du drømmer om å oppleve på FOCUS.\n\n` +
-        `*Hvem er involvert? Hva skjer? Hva er karakterens rolle?*\n` +
-        `*Vær så spesifikk som mulig. Minimum 80 tegn.*`,
+        `Hvem er involvert? Hva skjer? Hva er karakterens rolle?\n` +
+        `Vær spesifikk — «noe kult» teller ikke.\n\n` +
+        `*Minimum 80 tegn.*`,
       validate: (a) => a.trim().length < 80
         ? { pass: false, reason: `Gi et mer konkret og detaljert scenario. (Minimum 80 tegn)` }
         : { pass: true }

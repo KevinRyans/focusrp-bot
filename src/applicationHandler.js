@@ -305,7 +305,11 @@ async function postToStaffChannel(user, app) {
       .setEmoji('💬')
   );
 
-  const staffMsg = await staffChannel.send({ embeds: [embed], components: [row] });
+  const staffMsg = await staffChannel.send({
+    content: `<@&${process.env.STAFF_ROLE_ID || '992887161454084146'}> — ny whitelist-søknad`,
+    embeds: [embed],
+    components: [row]
+  });
   staffMessageMap.set(staffMsg.id, user.id);
   console.log(`[Application] Søknad fra ${user.tag} (${app.branch}) postet til staff.`);
 }
