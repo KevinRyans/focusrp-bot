@@ -1,0 +1,20 @@
+{
+  "name": "focusrp-whitelist-bot",
+  "version": "1.0.0",
+  "description": "Whitelisting bot for FOCUS RP FiveM server",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
