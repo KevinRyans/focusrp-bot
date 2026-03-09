@@ -69,13 +69,11 @@ async function setupApplicationChannel() {
   } catch {}
 
   // ── EMBED ──
+  const LOGO_URL = 'https://cdn.discordapp.com/attachments/1267992509481750530/1480695930997964922/focus-rp-horizontal.png';
+
   const embed = new EmbedBuilder()
-    .setColor(0x1A1A2E)
-    .setAuthor({
-      name: 'FOCUS RP — Whitelist',
-      iconURL: 'https://focusrp.no/favicon.ico'
-    })
-    .setTitle('Rollespill på *ordentlig*')
+    .setColor(0x080810)
+    .setImage(LOGO_URL)
     .setDescription(
       `FOCUS er en norsk FiveM-server for deg som vil ha mer enn bare skyte og kjøre.\n` +
       `Her bygger du en karakter, skriver en historie og er del av noe større.\n\n` +
@@ -91,7 +89,6 @@ async function setupApplicationChannel() {
       `→  Ønsker seriøst og kvalitetsrikt RP\n\n` +
       `*Søknaden tar ca. 10–15 minutter.*`
     )
-    .setImage('https://focusrp.no/banner.png')
     .setFooter({ text: 'focusrp.no  ·  Rollespill på ordentlig' })
     .setTimestamp();
 
