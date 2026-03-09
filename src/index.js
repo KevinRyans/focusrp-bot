@@ -71,9 +71,10 @@ async function setupApplicationChannel() {
   // ── EMBED ──
   const LOGO_URL = 'https://cdn.discordapp.com/attachments/1267992509481750530/1480695930997964922/focus-rp-horizontal.png';
 
+  await channel.send({ content: LOGO_URL });
+
   const embed = new EmbedBuilder()
     .setColor(0x080810)
-    .setImage(LOGO_URL)
     .setDescription(
       `FOCUS er en norsk FiveM-server for deg som vil ha mer enn bare skyte og kjøre.\n` +
       `Her bygger du en karakter, skriver en historie og er del av noe større.\n\n` +
