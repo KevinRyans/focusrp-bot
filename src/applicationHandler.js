@@ -24,6 +24,9 @@ const staffMessageMap = new Map();
 // Map<userId, dmChannelId> — for "spør om mer"-flow
 const dmChannelCache = new Map();
 
+// Map<userId, { staffMessageId, staffChannelId }> — venter på svar til staff-spørsmål
+const pendingStaffReplies = new Map();
+
 const TIMEOUT_MS = (parseInt(process.env.APPLICATION_TIMEOUT_MINUTES) || 30) * 60 * 1000;
 
 setInterval(() => {
@@ -316,5 +319,6 @@ module.exports = {
   handleAnswer,
   activeApplications,
   staffMessageMap,
-  dmChannelCache
+  dmChannelCache,
+  pendingStaffReplies
 };

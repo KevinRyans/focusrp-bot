@@ -24,7 +24,8 @@ const {
   handleAnswer,
   activeApplications,
   staffMessageMap,
-  dmChannelCache
+  dmChannelCache,
+  pendingStaffReplies
 } = require('./applicationHandler');
 
 // ─── CLIENT ─────────────────────────────────────────────────────────────────
@@ -318,6 +319,14 @@ async function handleStaffQuestion(interaction, targetId, question) {
       ]
     });
 
+    // Registrer at vi venter på svar fra søkeren
+    pendingStaffReplies.set(targetId, {
+      staffMessageId: interaction.message.id,
+      staffChannelId: interaction.message.channelId,
+      askedBy: interaction.user.tag,
+      question
+    });
+
     // Marker embed som "avventer svar"
     const originalEmbed = EmbedBuilder.from(interaction.message.embeds[0]);
     originalEmbed.setColor(0x4A90D9);
@@ -338,6 +347,37 @@ async function handleStaffQuestion(interaction, targetId, question) {
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (message.channel.type !== ChannelType.DM) return;
+
+  // Sjekk om brukeren venter på å svare på et staff-spørsmål
+  const pending = pendingStaffReplies.get(message.author.id);
+  if (pending) {
+    pendingStaffReplies.delete(message.author.id);
+    try {
+      const staffChannel = await client.channels.fetch(pending.staffChannelId);
+      const staffMsg = await staffChannel.messages.fetch(pending.staffMessageId);
+      const updatedEmbed = EmbedBuilder.from(staffMsg.embeds[0]);
+      updatedEmbed.setColor(0x9B9B9B);
+      updatedEmbed.addFields({
+        name: `💬 Svar fra søker`,
+        value: `**Spørsmål:** ${pending.question}\n**Svar:** ${message.content.substring(0, 800)}`,
+        inline: false
+      });
+      updatedEmbed.setFooter({ text: `Svar mottatt  ·  focusrp.no` });
+      await staffMsg.edit({ embeds: [updatedEmbed] });
+    } catch (err) {
+      console.error(`[Error] Kunne ikke oppdatere staff-embed med svar:`, err.message);
+    }
+    await message.react('✅');
+    await message.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0x4A90D9)
+          .setDescription(`✅ Svaret ditt er sendt til staff. De vil behandle søknaden din snart.`)
+          .setFooter({ text: 'focusrp.no  ·  Rollespill på ordentlig' })
+      ]
+    });
+    return;
+  }
 
   const wasHandled = await handleAnswer(message);
 
