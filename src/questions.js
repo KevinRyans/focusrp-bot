@@ -449,7 +449,60 @@ const QUESTIONS = {
       validate: (a) => a.trim().length < 80
         ? { pass: false, reason: `Gi et mer konkret og detaljert scenario. (Minimum 80 tegn)` }
         : { pass: true }
-    }
+    },
+
+    {
+  id: 'nu_social_connections',
+  title: '👥 Relasjoner',
+  description:
+    `Hvilke typer relasjoner ønsker karakteren din å bygge i byen?\n\n` +
+    `Venner, rivaler, samarbeid?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Beskriv relasjonene. (Minimum 40 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'nu_character_goal',
+  title: '🎯 Karaktermål',
+  description:
+    `Hva er det langsiktige målet til karakteren din?`,
+  validate: (a) => a.trim().length < 30
+    ? { pass: false, reason: `Beskriv målet. (Minimum 30 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'nu_unexpected_event',
+  title: '⚡ Scenario',
+  description:
+    `Karakteren din havner plutselig midt i en konflikt mellom politi og kriminelle.\n\n` +
+    `Hva gjør karakteren din?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar reaksjonen. (Minimum 40 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'nu_moral_choice',
+  title: '⚖️ Moralsk valg',
+  description:
+    `Karakteren din får muligheten til å tjene penger på noe ulovlig.\n\n` +
+    `Hvordan bestemmer de seg for hva som er riktig?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar karakterens tankegang. (Minimum 40 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'nu_city_life',
+  title: '🌆 Liv i byen',
+  description:
+    `Hva gjør karakteren din på en helt vanlig dag i byen?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Beskriv hverdagen. (Minimum 40 tegn)` }
+    : { pass: true }
+}
   ]
 };
 
