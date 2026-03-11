@@ -76,17 +76,17 @@ async function setupApplicationChannel() {
   const embed = new EmbedBuilder()
     .setColor(0x080810)
     .setDescription(
-      `FOCUS er en norsk FiveM-server for deg som vil ha mer enn bare skyte og kjøre.\n` +
+      `FOCUS er en norsk server for deg som vil ha mer enn bare skyte og kjøre.\n` +
       `Her bygger du en karakter, skriver en historie og er del av noe større.\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `**📋  Søknadsprosessen**\n` +
       `\`01\`  Fyll ut søknaden i DM med boten\n` +
       `\`02\`  Staff behandler søknaden din\n` +
-      `\`03\`  Bestå intervju — og du er inn\n\n` +
+      `\`03\`  Bestå intervju — og du er inne\n\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
       `**⚠️  Krav**\n` +
       `→  Minimum **${process.env.MIN_AGE || 16} år**\n` +
-      `→  Lest og forstått alle **#regler**\n` +
+      `→  Lest og forstått alle regler? **focusrp.no**\n` +
       `→  Ønsker seriøst og kvalitetsrikt RP\n\n` +
       `*Søknaden tar ca. 10–15 minutter.*`
     )
