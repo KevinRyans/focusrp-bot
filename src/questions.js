@@ -164,7 +164,6 @@ const QUESTIONS = {
     ? { pass: false, reason: `Forklar hvordan du bidrar. (Minimum 40 tegn)` }
     : { pass: true }
 },
-    },
 
     {
       id: 'character_type',
