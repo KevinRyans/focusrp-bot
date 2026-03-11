@@ -98,6 +98,70 @@ const QUESTIONS = {
         }
         return { pass: true };
       }
+      {
+  id: 'previous_bans',
+  title: '⚖️ Tidligere utestengelser',
+  description:
+    `Har du noen gang blitt utestengt fra en annen RP-server?\n\n` +
+    `Hvis ja:\n` +
+    `• hvilken server\n` +
+    `• hva skjedde\n` +
+    `• hva lærte du av det\n\n` +
+    `Ærlighet teller mer enn perfekte svar.\n\n` +
+    `*Minimum 40 tegn.*`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar litt mer. (Minimum 40 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'conflict_handling',
+  title: '🤝 Konflikter i RP',
+  description:
+    `Du havner i en RP-situasjon som du mener er urettferdig eller dårlig spilt.\n\n` +
+    `Hva gjør du:\n` +
+    `• i scenen (IC)\n` +
+    `• etter scenen (OOC)?\n\n` +
+    `*Minimum 50 tegn.*`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar hvordan du håndterer situasjonen. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'server_expectations',
+  title: '🌍 Forventninger',
+  description:
+    `Hva forventer du av en RP-server for at opplevelsen skal bli bra?\n\n` +
+    `Hva forventer du av andre spillere — og hva kan de forvente av deg?\n\n` +
+    `*Minimum 50 tegn.*`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Utdyp litt mer. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'powergaming_test',
+  title: '🧠 Scenario',
+  description:
+    `Du starter en slåsskamp og skriver i /me at motstanderen "blir slått bevisstløs".\n\n` +
+    `Hvorfor er dette problematisk i RP?\n` +
+    `Hva kalles dette regelbruddet?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar hvorfor dette er feil. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'community_contribution',
+  title: '🏙️ Fellesskap',
+  description:
+    `Et godt RP-miljø bygges av spillerne.\n\n` +
+    `Hva gjør du personlig for å bidra til et sunt og seriøst RP-miljø?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar hvordan du bidrar. (Minimum 40 tegn)` }
+    : { pass: true }
+},
     },
 
     {
@@ -173,7 +237,62 @@ const QUESTIONS = {
       validate: (a) => a.trim().length < 50
         ? { pass: false, reason: `Utdyp litt mer. (Minimum 50 tegn)` }
         : { pass: true }
-    }
+    },
+    {
+  id: 'lv_police_interaction',
+  title: '🚓 Scenario',
+  description:
+    `Politiet stopper deg i en rutinekontroll.\n\n` +
+    `Du vet OOC at de egentlig er ute etter en annen spiller.\n\n` +
+    `Hvordan håndterer karakteren din situasjonen RP-messig?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar hvordan scenen spilles ut. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'lv_job_roleplay',
+  title: '💼 Jobb-RP',
+  description:
+    `Hvis karakteren din har en jobb (f.eks mekaniker, taxi, butikk),\n` +
+    `hvordan kan du gjøre jobben til mer interessant RP for andre spillere?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Beskriv hvordan du skaper RP. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'lv_witness_crime',
+  title: '👀 Scenario',
+  description:
+    `Du ser et ran skje foran deg.\n\n` +
+    `Hva gjør karakteren din etterpå?\n` +
+    `Tenk på realisme og RP.`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar reaksjonen til karakteren din. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'lv_character_flaws',
+  title: '🧩 Karaktersvakheter',
+  description:
+    `Ingen gode RP-karakterer er perfekte.\n\n` +
+    `Nevn minst én svakhet karakteren din har.`,
+  validate: (a) => a.trim().length < 30
+    ? { pass: false, reason: `Beskriv minst én svakhet. (Minimum 30 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'lv_longterm_story',
+  title: '📖 Historieutvikling',
+  description:
+    `Hvordan ser du for deg at karakteren din kan utvikle seg over tid på serveren?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Beskriv utviklingen. (Minimum 40 tegn)` }
+    : { pass: true }
+}
   ],
 
   // ─── KRIMINELL BRANCH ───────────────────────────────────────────────────────
@@ -224,7 +343,61 @@ const QUESTIONS = {
       validate: (a) => a.trim().length < 60
         ? { pass: false, reason: `Gi et mer konkret eksempel. (Minimum 60 tegn)` }
         : { pass: true }
-    }
+    },
+
+    {
+  id: 'kr_consequences',
+  title: '⚖️ Konsekvenser',
+  description:
+    `Kriminalitet i RP har konsekvenser.\n\n` +
+    `Hvordan spiller du ut konsekvenser dersom karakteren din blir tatt av politiet?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar hvordan du håndterer det. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'kr_power_balance',
+  title: '🎭 Scenario',
+  description:
+    `Du og gjengen din har makt i byen.\n\n` +
+    `Hvordan unngår du at RP-en blir ensidig eller ødelegger opplevelsen for andre spillere?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Forklar hvordan du balanserer RP. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'kr_conflict_rp',
+  title: '🔥 Konflikt-RP',
+  description:
+    `To kriminelle grupper havner i konflikt.\n\n` +
+    `Hvordan kan du gjøre konflikten interessant RP i stedet for bare skyting?`,
+  validate: (a) => a.trim().length < 50
+    ? { pass: false, reason: `Beskriv RP-muligheter. (Minimum 50 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'kr_loyalty',
+  title: '🤝 Lojalitet',
+  description:
+    `Karakteren din får muligheten til å tjene penger ved å svikte gjengen sin.\n\n` +
+    `Hvordan håndterer karakteren dette?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar karakterens valg. (Minimum 40 tegn)` }
+    : { pass: true }
+},
+
+{
+  id: 'kr_realism',
+  title: '🧠 Realisme',
+  description:
+    `Hva skiller god kriminell RP fra "action-RP"?`,
+  validate: (a) => a.trim().length < 40
+    ? { pass: false, reason: `Forklar forskjellen. (Minimum 40 tegn)` }
+    : { pass: true }
+}
   ],
 
   // ─── NØYTRAL BRANCH ─────────────────────────────────────────────────────────
