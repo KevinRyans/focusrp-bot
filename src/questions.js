@@ -97,7 +97,7 @@ const QUESTIONS = {
           return { pass: false, reason: `Svar på begge spørsmålene. (Minimum 60 tegn)` };
         }
         return { pass: true };
-      }
+      },
       {
   id: 'previous_bans',
   title: '⚖️ Tidligere utestengelser',
