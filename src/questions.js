@@ -55,14 +55,14 @@ const QUESTIONS = {
       title: '📋 Regler',
       description:
         `Har du lest og forstått **alle** reglene til FOCUS RP?\n` +
-        `Du finner dem i **#regler**-kanalen på Discord.\n\n` +
+        `Du finner dem på **focusrp.no** under regler.\n\n` +
         `Svar: \`ja\` eller \`nei\``,
       validate: (answer) => {
         if (answer.trim().toLowerCase() !== 'ja') {
           return {
             pass: false,
             autoReject: true,
-            reason: `Du må lese reglene **før** du søker.\nFinn dem i **#regler**, og send inn en ny søknad når du har lest dem.`
+            reason: `Du må lese reglene **før** du søker.\nFinn dem på **focusrp.no**, og send inn en ny søknad når du har lest dem.`
           };
         }
         return { pass: true };
@@ -86,7 +86,7 @@ const QUESTIONS = {
 
     {
       id: 'rp_definition',
-      title: '🧠 Scenario — metagaming',
+      title: '🧠 Scenario',
       description:
         `Du sitter i en RP-scene. En Discord-venn sender deg melding og forteller deg akkurat hva som venter rundt hjørnet — info karakteren din umulig kan vite.\n\n` +
         `**To spørsmål:**\n` +
@@ -143,7 +143,7 @@ const QUESTIONS = {
 
     {
       id: 'lv_fearrp',
-      title: '😰 Scenario — FearRP',
+      title: '😰 Scenario',
       description:
         `Karakteren din er alene på en øde parkeringsplass sent på kvelden. To maskerte menn nærmer seg og sier: *«Gi oss bilen og lommeboka, nå.»*\n\n` +
         `En del av deg tenker at det bare er et spill og vil bare kjøre vekk.\n\n` +
@@ -155,7 +155,7 @@ const QUESTIONS = {
 
     {
       id: 'lv_rdm',
-      title: '🚗 Scenario — RDM/VDM',
+      title: '🚗 Scenario',
       description:
         `Du kjører rolig nedover gaten. En bil begynner å ramme deg gjentatte ganger, sjåføren hopper ut og skyter mot deg — uten ett ord RP-messig.\n\n` +
         `**Hva heter dette regelrubruddet, og hva gjør du (IC og OOC)?**`,
@@ -194,7 +194,7 @@ const QUESTIONS = {
 
     {
       id: 'kr_rdm',
-      title: '🔫 Scenario — RDM',
+      title: '🔫 Scenario',
       description:
         `En bekjent i miljøet ditt foreslår å kjøre forbi en tilfeldig gruppe folk og skyte mot dem — ingen RP-grunn, «bare for moro».\n\n` +
         `**Hva heter dette regelrubruddet, og hva sier/gjør karakteren din?**`,
@@ -205,7 +205,7 @@ const QUESTIONS = {
 
     {
       id: 'kr_fearrp',
-      title: '😰 Scenario — FearRP',
+      title: '😰 Scenario',
       description:
         `Karakteren din er alene og blir omringet av fire bevæpnede menn. De krever bilen og alle verdisaker.\n\n` +
         `Karakteren din er «tough» — du vil argumentere tilbake.\n\n` +
@@ -245,7 +245,7 @@ const QUESTIONS = {
 
     {
       id: 'nu_metagaming',
-      title: '🧠 Scenario — metagaming',
+      title: '🧠 Scenario',
       description:
         `Du handler med noen du aldri har møtt IC. OOC kjenner du dem fra Discord — du vet at de egentlig jobber undercover for politiet.\n\n` +
         `**Hva heter det dersom du bruker denne infoen IC, og hva gjør du?**`,
@@ -256,7 +256,7 @@ const QUESTIONS = {
 
     {
       id: 'nu_failrp',
-      title: '🚨 Scenario — FailRP',
+      title: '🚨 Scenario',
       description:
         `Karakteren din er involvert i en bilulykke. Bilen er vraket og du er skadet RP-messig. En annen spiller stopper og tilbyr hjelp — men du hopper bare inn i en ny bil og kjører avgårde som om ingenting har skjedd.\n\n` +
         `**Hva er galt med dette, og hva heter regelrubruddet?**`,
