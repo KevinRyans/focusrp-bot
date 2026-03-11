@@ -92,12 +92,14 @@ const QUESTIONS = {
         `**To spørsmål:**\n` +
         `→ Hva heter regelbruddet det ville vært å bruke denne infoen IC?\n` +
         `→ Hva gjør du med meldingen?`,
-      validate: (answer) => {
+     validate: (answer) => {
         if (answer.trim().length < 60) {
           return { pass: false, reason: `Svar på begge spørsmålene. (Minimum 60 tegn)` };
         }
         return { pass: true };
-      },
+      }
+    },
+    
       {
   id: 'previous_bans',
   title: '⚖️ Tidligere utestengelser',
