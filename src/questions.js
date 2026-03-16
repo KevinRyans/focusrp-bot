@@ -111,7 +111,7 @@ const QUESTIONS = {
     `• hva lærte du av det\n\n` +
     `Ærlighet teller mer enn perfekte svar.\n\n` +
     `*Minimum 40 tegn.*`,
-  validate: (a) => a.trim().length < 40
+  validate: (a) => a.trim().length < 0
     ? { pass: false, reason: `Forklar litt mer. (Minimum 40 tegn)` }
     : { pass: true }
 },
@@ -125,7 +125,7 @@ const QUESTIONS = {
     `• i scenen (IC)\n` +
     `• etter scenen (OOC)?\n\n` +
     `*Minimum 50 tegn.*`,
-  validate: (a) => a.trim().length < 50
+  validate: (a) => a.trim().length < 30
     ? { pass: false, reason: `Forklar hvordan du håndterer situasjonen. (Minimum 50 tegn)` }
     : { pass: true }
 },
@@ -137,7 +137,7 @@ const QUESTIONS = {
     `Hva forventer du av en RP-server for at opplevelsen skal bli bra?\n\n` +
     `Hva forventer du av andre spillere — og hva kan de forvente av deg?\n\n` +
     `*Minimum 50 tegn.*`,
-  validate: (a) => a.trim().length < 50
+  validate: (a) => a.trim().length < 30
     ? { pass: false, reason: `Utdyp litt mer. (Minimum 50 tegn)` }
     : { pass: true }
 },
@@ -149,7 +149,7 @@ const QUESTIONS = {
     `Du starter en slåsskamp og skriver i /me at motstanderen "blir slått bevisstløs".\n\n` +
     `Hvorfor er dette problematisk i RP?\n` +
     `Hva kalles dette regelbruddet?`,
-  validate: (a) => a.trim().length < 50
+  validate: (a) => a.trim().length < 30
     ? { pass: false, reason: `Forklar hvorfor dette er feil. (Minimum 50 tegn)` }
     : { pass: true }
 },
@@ -160,7 +160,7 @@ const QUESTIONS = {
   description:
     `Et godt RP-miljø bygges av spillerne.\n\n` +
     `Hva gjør du personlig for å bidra til et sunt og seriøst RP-miljø?`,
-  validate: (a) => a.trim().length < 40
+  validate: (a) => a.trim().length < 30
     ? { pass: false, reason: `Forklar hvordan du bidrar. (Minimum 40 tegn)` }
     : { pass: true }
 },
